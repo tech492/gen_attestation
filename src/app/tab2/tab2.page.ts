@@ -5,7 +5,7 @@ import {BarcodeScanner} from "@ionic-native/barcode-scanner/ngx";
 import {GlobalToolsProvider} from "../global-tools/global-tools";
 import {PDFDocument, StandardFonts} from 'pdf-lib'
 import {File} from "@ionic-native/file/ngx";
-import {attestq42020} from "src/app/tab2/pdfb64.js"
+import {attestq42020, attestRoy} from "src/app/tab2/pdfb64.js"
 import {FileOpener} from "@ionic-native/file-opener/ngx";
 
 @Component({
@@ -24,7 +24,7 @@ export class Tab2Page {
 
     }
 
-    // méthode principale pour générer l'attestation
+    // méthode pour créer les données de l'attestation
     gen() {
         let motifString: string;
         let attestation: Attestation;
@@ -87,62 +87,81 @@ export class Tab2Page {
         this.tools.showAlert('Info', text)
     }
 
-    //
-    async generatePdf(attestation: Attestation) {
+    // Methode principale pour générer le pdf
+    async generatePdf(attestation: Attestation, style: number) {
         console.log("Hello generatePdf : ", attestation);
+
         const motifsArray = attestation.motifs.split(', ');
 
         // chargement du modèle d'attestation
-        const pdfDoc = await PDFDocument.load(attestq42020);
+        let pdfDoc;
+        if (style == 1) {
+            pdfDoc = await PDFDocument.load(attestq42020);
+        } else {
+            pdfDoc = await PDFDocument.load(attestRoy);
+        }
 
         // Seule la première page nous interesse
         const page1 = pdfDoc.getPages()[0];
 
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-        // methode anonyme imbriquée pour insérer du texte dans la page
-        const drawText = (text, x, y, size = 11) => {
-            page1.drawText(text, {x, y, size, font})
-        };
-
-        // liste des positions verticales des motifs
-        const ys = {
-            travail: 578,
-            achats: 533,
-            sante: 477,
-            famille: 435,
-            handicap: 396,
-            sport_animaux: 358,
-            convocation: 295,
-            missions: 255,
-            enfants: 211,
-        }
-
-        drawText(`${attestation.prenom} ${attestation.nom}`, 119, 696);
-        drawText(attestation.dateDN, 119, 674);
-        drawText(attestation.villeNaissance, 297, 674);
-        drawText(`${attestation.adresse} ${attestation.cp} ${attestation.ville}`, 133, 652);
-
-        motifsArray.forEach((motif) => {
-            drawText('x', 84, ys[motif], 18)
-        })
-
         let locationSize = this.idealFontSize(font, attestation.ville, 83, 7, 11);
-
         if (!locationSize) {
             alert('Le nom de la ville risque de ne pas être affiché correctement en raison de sa longueur. ' +
                 'Essayez d\'utiliser des abréviations ("Saint" en "St." par exemple) quand cela est possible.')
             locationSize = 7
         }
 
-        drawText(attestation.ville, 105, 177, locationSize)
+        // methode anonyme imbriquée pour insérer du texte dans la page
+        const drawText = (text, x, y, size = style === 1 ? 11 : 18) => {
+            page1.drawText(text, {x, y, size, font})
+        };
 
-        // il faut choisir un motif
-        if (motifsArray.length > 0) {
-            // Date sortie
-            drawText(`${attestation.dateSortie}`, 91, 153)
-            drawText(attestation.heureSortie, 264, 153, 11)
+        // liste des positions verticales des motifs
+        const ys = {
+            travail: [578, 448],
+            achats: [533, 400],
+            sante: [477, 363],
+            famille: [435, 322],
+            handicap: [396, null],
+            sport_animaux: [358, 239],
+            convocation: [295, 198],
+            missions: [255, null],
+            enfants: [211, 277],
         }
+
+        // Tableau des données à insérer dans chaque formulaire
+        const data = [
+            [
+                [`${attestation.prenom} ${attestation.nom}`, 119, 696],
+                [attestation.dateDN, 119, 674],
+                [attestation.villeNaissance, 297, 674],
+                [`${attestation.adresse} ${attestation.cp} ${attestation.ville}`, 133, 652],
+                [attestation.ville, 105, 177, locationSize],
+                [`${attestation.dateSortie}`, 91, 153],
+                [attestation.heureSortie, 264, 153, 11]
+
+            ],
+            [
+                [attestation.heureSortie, 405, 180],
+                ['à ' + attestation.ville, 455, 180]
+            ]
+        ]
+
+        // Iteration sur les données textuelles à insérer
+        data[style - 1].forEach((drawing) => {
+            drawText(drawing[0], drawing[1], drawing[2], drawing[3] ? drawing[3] : undefined);
+        })
+
+        // Iteration sur les motifs à cocher
+        motifsArray.forEach((motif) => {
+            if (style === 1) {
+                drawText('x', 84, ys[motif][0], 18)
+            }
+            if (style === 2 && ys[motif][1]) {
+                drawText('x', 92, ys[motif][1], 23)
+            }
+        })
 
         // génération du pdf proprement dit
         const pdfBytes = await pdfDoc.save();

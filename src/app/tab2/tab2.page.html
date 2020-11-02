@@ -36,16 +36,16 @@
         </ion-card-content>
     </ion-card>
     <ion-list *ngIf="data.attestations">
-        <ion-item *ngFor="let attestation of data.attestations" (click)="genQr(attestation.qrcode)"
+        <ion-item *ngFor="let attestation of data.attestations"
                   class="ion-text-wrap">
             <ion-label>
                 <ion-text class="ion-text-wrap"><h2>{{attestation.dateCreation}} {{attestation.heureCreation}}</h2>
                 </ion-text>
                 ({{attestation.motifs}})
             </ion-label>
-            <ion-icon name="qr-code-sharp" slot="end"></ion-icon>
-            <ion-icon name="document" slot="end"
-                      (click)="generatePdf(attestation); $event.stopPropagation()"></ion-icon>
+            <ion-icon name="qr-code-sharp" slot="end" (click)="genQr(attestation.qrcode)"></ion-icon>
+            <ion-icon name="document" slot="end" (click)="generatePdf(attestation, 1)"></ion-icon>
+            <img src="assets/lis.png" class="iconCustom" slot="end" (click)="generatePdf(attestation, 2)">
         </ion-item>
     </ion-list>
 
