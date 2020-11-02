@@ -1,0 +1,7 @@
+{
+  "name": "attest_dep",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}

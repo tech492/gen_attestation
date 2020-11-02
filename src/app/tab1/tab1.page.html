@@ -1,0 +1,50 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+     Données personnelles
+    </ion-title>
+    <ion-button slot="end" color="danger" (click)="data.razBio()">RAZ</ion-button>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Tab 1</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list>
+    <ion-item>
+      <ion-label>Nom</ion-label>
+      <ion-input [(ngModel)]="this.data.bioData.nom" placeholder="Némar"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Prénom</ion-label>
+      <ion-input [(ngModel)]="this.data.bioData.prenom" placeholder="Jean"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Date de naissance</ion-label>
+      <ion-input placeholder="01/01/1970" [(ngModel)]="this.data.bioData.dateDN" pattern="^([0][1-9]|[1-2][0-9]|30|31)\/([0][1-9]|10|11|12)\/(19[0-9][0-9]|20[0-1][0-9]|2020)"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Lieu de naissance</ion-label>
+      <ion-input [(ngModel)]="this.data.bioData.villeNaissance" placeholder="Banlieueville"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Adresse</ion-label>
+      <ion-input [(ngModel)]="this.data.bioData.adresse" placeholder="999 avenue déserte"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Ville</ion-label>
+      <ion-input [(ngModel)]="this.data.bioData.ville" placeholder="Poneyville"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Code Postal</ion-label>
+      <ion-input [(ngModel)]="this.data.bioData.cp" inputmode="numeric"></ion-input>
+    </ion-item>
+  </ion-list>
+
+<!--  <app-explore-container name="Tab 1 page"></app-explore-container>-->
+</ion-content>

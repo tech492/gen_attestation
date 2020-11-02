@@ -1,0 +1,13 @@
+ion-content ion-toolbar {
+  --background: translucent;
+}
+
+#logo_cdadr {
+  ion-img {
+    width: 50%;
+    margin: auto;
+    margin-top: 2em;
+  }
+
+  text-align: center;
+}
