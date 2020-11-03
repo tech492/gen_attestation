@@ -1,19 +1,22 @@
 import {Injectable} from '@angular/core';
 import {Attestation} from "../attestation";
 import {Storage} from '@ionic/storage';
-import {BioData} from "../bio-data";
+import {Pax} from "../pax";
 
 @Injectable({
     providedIn: 'root'
 })
 export class DataService {
 
+    listePax: Array<Pax>;
+    motifs: Array<Motif>;
+    attestations: Array<Attestation>;
 
-    motifs: Array<Motif>
-    bioData = new BioData();
-    attestations: Array<Attestation>
+    tempListQR = [];
+
 
     constructor(private storage: Storage) {
+        this.attestations = [];
         this.motifs = [
             {
                 infos: 'Déplacements entre le domicile et le lieu d’exercice de l\’activité professionnelle ou un établissement d\’enseignement ou de formation, déplacements professionnels ne pouvant être différés, déplacements pour un concours ou un examen.',
@@ -67,7 +70,6 @@ export class DataService {
                 infos: 'Déplacement pour chercher les enfants à l’école et à l’occasion de leurs activités périscolaires', isChecked: false
             }];
 
-        this.attestations = [];
         storage.ready().then(() => {
             this.getData()
         });
@@ -78,7 +80,7 @@ export class DataService {
     saveData() {
         console.log("saving");
         this.storage.set('attestations', this.attestations);
-        this.storage.set('bioData', this.bioData);
+        this.storage.set('bioData', this.listePax);
     }
 
     // récupère les données persistées en mémoire
@@ -89,13 +91,13 @@ export class DataService {
         }
         temp = await this.storage.get('bioData');
         if (temp !== null) {
-            this.bioData = temp;
+            this.listePax = temp;
         }
     }
 
     // remise à zéro des données d'identité
     razBio() {
-        this.bioData = new BioData();
+        this.listePax = [];
         this.saveData();
     }
 
@@ -112,6 +114,7 @@ interface Motif {
     infos,
     isChecked
 }
+
 
 
 

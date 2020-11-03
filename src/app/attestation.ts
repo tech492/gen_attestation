@@ -1,13 +1,9 @@
+import {Pax} from "./pax";
+
 export class Attestation {
     constructor(public dateCreation= "",
                 public heureCreation: string,
-                public nom: string,
-                public prenom: string,
-                public dateDN: string,
-                public villeNaissance: string,
-                public adresse: string,
-                public ville: string,
-                public cp: string,
+                public listePax: Array<Pax>,
                 public dateSortie: string,
                 public heureSortie: string,
                 public motifs: string,

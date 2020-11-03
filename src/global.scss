@@ -24,3 +24,15 @@
 @import "~@ionic/angular/css/text-alignment.css";
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
+
+.modal-class {
+  --background: none;
+  --box-shadow: none;
+  --height: 100%;
+  --width: 90%;
+
+  .popover-content.sc-ion-popover-md {
+    max-height: 100%
+  }
+}
+

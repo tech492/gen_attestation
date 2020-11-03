@@ -1,7 +1,7 @@
-import { BioData } from './bio-data';
+import { Pax } from './pax';
 
 describe('BioData', () => {
   it('should create an instance', () => {
-    expect(new BioData()).toBeTruthy();
+    expect(new Pax()).toBeTruthy();
   });
 });

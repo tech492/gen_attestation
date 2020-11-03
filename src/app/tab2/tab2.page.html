@@ -15,26 +15,41 @@
             <ion-title size="large">Tab 2</ion-title>
         </ion-toolbar>
     </ion-header>
-
-    <!--  <app-explore-container name="Tab 2 page"></app-explore-container>-->
-
-    <ion-card *ngIf="generateurActif">
-        <ion-card-content>
-            <ion-card-title>Choisir le(s) motif(s)</ion-card-title>
+    <div *ngIf="generateurActif">
+        <ion-card>
+            <ion-card-title>Choisir le(s) bénéficiaires(s)</ion-card-title>
             <ion-list class="ion-no-padding">
-                <ion-item *ngFor="let motif of this.data.motifs">
-                    <ion-icon name="information-circle-outline" slot="start" (click)="showTip(motif.infos)"></ion-icon>
+                <ion-item *ngFor="let pax of this.data.listePax">
+                    <ion-icon name="person" slot="start"></ion-icon>
                     <ion-label class="ion-text-wrap">
                         <ion-text>
-                            <h3>{{motif.text}}</h3>
+                            <h3>{{pax.nom}} {{pax.prenom}}</h3>
                         </ion-text>
                     </ion-label>
-                    <ion-checkbox slot="end" [(ngModel)]="motif.isChecked"></ion-checkbox>
+                    <ion-checkbox slot="end" [(ngModel)]="pax.isChecked"></ion-checkbox>
                 </ion-item>
             </ion-list>
-            <ion-button size="full" (click)="gen()">Generer</ion-button>
-        </ion-card-content>
-    </ion-card>
+        </ion-card>
+        <ion-card>
+            <ion-card-content>
+                <ion-card-title>Choisir le(s) motif(s)</ion-card-title>
+                <ion-list class="ion-no-padding">
+                    <ion-item *ngFor="let motif of this.data.motifs">
+                        <ion-icon name="information-circle-outline" slot="start"
+                                  (click)="showTip(motif.infos)"></ion-icon>
+                        <ion-label class="ion-text-wrap">
+                            <ion-text>
+                                <h3>{{motif.text}}</h3>
+                            </ion-text>
+                        </ion-label>
+                        <ion-checkbox slot="end" [(ngModel)]="motif.isChecked"></ion-checkbox>
+                    </ion-item>
+                </ion-list>
+                <ion-button size="full" (click)="gen()">Generer</ion-button>
+            </ion-card-content>
+        </ion-card>
+    </div>
+
     <ion-list *ngIf="data.attestations">
         <ion-item *ngFor="let attestation of data.attestations"
                   class="ion-text-wrap">
@@ -43,7 +58,7 @@
                 </ion-text>
                 ({{attestation.motifs}})
             </ion-label>
-            <ion-icon name="qr-code-sharp" slot="end" (click)="genQr(attestation.qrcode)"></ion-icon>
+            <ion-icon name="qr-code-sharp" slot="end" (click)="genQr(attestation)"></ion-icon>
             <ion-icon name="document" slot="end" (click)="generatePdf(attestation, 1)"></ion-icon>
             <img src="assets/lis.png" class="iconCustom" slot="end" (click)="generatePdf(attestation, 2)">
         </ion-item>
