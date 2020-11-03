@@ -1,0 +1,14 @@
+<ion-card *ngFor="let qr of data.tempListQR">
+    <ion-card-header>
+        <ion-card-title>{{qr.prenom}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+        <ngx-qrcode
+                [elementType]="elementType"
+                [errorCorrectionLevel]="correctionLevel"
+                [value]="qr.qrCode"
+                cssClass="bshadow"></ngx-qrcode>
+    </ion-card-content>
+
+</ion-card>
+
