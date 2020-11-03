@@ -1,14 +1,12 @@
 import {Component} from '@angular/core';
 import {Attestation} from "../attestation";
 import {DataService} from "../service/data.service";
-import {BarcodeScanner} from "@ionic-native/barcode-scanner/ngx";
 import {GlobalToolsProvider} from "../global-tools/global-tools";
 import {PDFDocument, StandardFonts} from 'pdf-lib'
 import {File} from "@ionic-native/file/ngx";
 import {attestq42020, attestRoy} from "src/app/tab2/pdfb64.js"
 import {FileOpener} from "@ionic-native/file-opener/ngx";
 import {Pax} from "../pax";
-import {NgxQrcodeElementTypes, NgxQrcodeErrorCorrectionLevels} from "@techiediaries/ngx-qrcode";
 import {PopoverController} from "@ionic/angular";
 import {QrcodelistComponent} from "./qrcodelist/qrcodelist.component";
 
@@ -22,7 +20,7 @@ export class Tab2Page {
     generateurActif = false;
 
 
-    constructor(public data: DataService, private barcodeScanner: BarcodeScanner,
+    constructor(public data: DataService,
                 private tools: GlobalToolsProvider,
                 private file: File,
                 private fileOpener: FileOpener,
@@ -73,11 +71,6 @@ export class Tab2Page {
 
         this.generateurActif = false;
     }
-
-// Affichage du QRCODE à la demande
-    /*    async showQr(attestation: Attestation) {
-            await this.barcodeScanner.encode(this.barcodeScanner.Encode.TEXT_TYPE, data);
-        }*/
 
     async genQr(attestation: Attestation) {
         let loading = await this.tools.presentLoading("Génération en cours...");

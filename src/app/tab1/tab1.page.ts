@@ -13,7 +13,7 @@ export class Tab1Page {
     }
 
     addPax() {
-        if (this.data.listePax) {
+        if (this.data.listePax.length > 0) {
             this.data.listePax.push(
                 new Pax(
                     this.data.listePax[0].adresse,
