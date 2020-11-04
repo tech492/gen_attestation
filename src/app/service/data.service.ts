@@ -69,6 +69,7 @@ export class DataService {
                 value: 'enfants',
                 infos: 'Déplacement pour chercher les enfants à l’école et à l’occasion de leurs activités périscolaires', isChecked: false
             }];
+        this.listePax= [];
 
         storage.ready().then(() => {
             this.getData()
