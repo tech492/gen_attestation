@@ -14,6 +14,7 @@ import { File } from '@ionic-native/file/ngx';
 import {FormsModule} from "@angular/forms";
 import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
 import {QrcodelistComponent} from "./tab2/qrcodelist/qrcodelist.component";
+import { Clipboard } from '@ionic-native/clipboard/ngx';
 
 @NgModule({
   declarations: [AppComponent, QrcodelistComponent],
@@ -21,6 +22,7 @@ import {QrcodelistComponent} from "./tab2/qrcodelist/qrcodelist.component";
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,
     IonicStorageModule.forRoot(), NgxQRCodeModule],
   providers: [
+    Clipboard,
     File,
     FileOpener,
     GlobalToolsProvider,

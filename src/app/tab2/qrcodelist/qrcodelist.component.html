@@ -2,12 +2,15 @@
     <ion-card-header>
         <ion-card-title>{{qr.prenom}}</ion-card-title>
     </ion-card-header>
-    <ion-card-content>
+    <ion-card-content (click)="copy(qr.qrCode)">
         <ngx-qrcode
                 [elementType]="elementType"
                 [errorCorrectionLevel]="correctionLevel"
                 [value]="qr.qrCode"
                 cssClass="bshadow"></ngx-qrcode>
+
+        <input type="hidden" [value]="qr.qrCode" id="outputText">
+
     </ion-card-content>
 
 </ion-card>

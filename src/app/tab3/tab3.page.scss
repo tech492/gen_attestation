@@ -2,12 +2,30 @@ ion-content ion-toolbar {
   --background: translucent;
 }
 
-#logo_cdadr {
-  ion-img {
-    width: 50%;
-    margin: auto;
-    margin-top: 2em;
+#pourBoire {
+  width: 100vw;
+  background: #FF9C08;
+  margin: 0 -16px 0 -16px;
+  padding: 20px 0 20px 0;
+  text-align: center;
+  color: white;
+
+  p {
+    font-weight: bold;
   }
 
-  text-align: center;
+  img {
+    object-fit: contain;
+    height: 90%;
+  }
+
+  ion-button {
+    .button-native {
+      padding: 20px;
+    }
+  }
+}
+
+#email {
+  user-select: text!important;
 }
