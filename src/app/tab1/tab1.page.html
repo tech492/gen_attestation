@@ -16,11 +16,14 @@
     </ion-header>
 
     <div *ngIf="data.listePax">
-        <ion-list *ngFor="let pax of data.listePax">
+        <ion-list *ngFor="let pax of data.listePax; let i = index">
             <ion-card>
                 <ion-card-header>
-                    <ion-card-title>
+                    <ion-toolbar>
+                    <ion-card-title slot="start">
                         <ion-icon name="person"></ion-icon> {{pax.prenom}}</ion-card-title>
+                        <ion-button slot="end" color="danger" (click)="suppPax(i)"><ion-icon name="trash" slot="icon-only"></ion-icon></ion-button>
+                    </ion-toolbar>
                 </ion-card-header>
 
                 <ion-card-content>

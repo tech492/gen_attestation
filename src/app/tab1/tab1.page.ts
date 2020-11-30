@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {DataService} from "../service/data.service";
 import {Pax} from "../pax";
+import {GlobalToolsProvider} from "../global-tools/global-tools";
 
 @Component({
     selector: 'app-tab1',
@@ -9,8 +10,13 @@ import {Pax} from "../pax";
 })
 export class Tab1Page {
 
-    constructor(public data: DataService) {
+    constructor(public data: DataService,
+                private tools: GlobalToolsProvider) {
     }
+
+    ionViewWillLeave() {
+        this.data.saveData()
+}
 
     addPax() {
         if (this.data.listePax.length > 0) {
@@ -23,7 +29,13 @@ export class Tab1Page {
         } else {
             this.data.listePax.push(new Pax());
         }
-
         this.data.saveData();
+    }
+
+    suppPax(index) {
+        this.tools.showAlert("Attention", "Etes-vous sur de vouloir supprimer "+ this.data.listePax[index].prenom+" ?", () => {
+            this.data.listePax.splice(index, 1);
+            this.data.saveData();
+        })
     }
 }

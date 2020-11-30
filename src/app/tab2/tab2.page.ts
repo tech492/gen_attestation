@@ -28,6 +28,19 @@ export class Tab2Page {
 
     }
 
+    info () {
+        if (this.data.miseEnGardeActif) {
+            let miseEnGarde = "Les personnes souhaitant bénéficier de l'une de ces exceptions doivent se munir s'il y a lieu, lors de leurs déplacements hors de leur domicile, d'un document leur permettant de justifier que le déplacement considéré entre dans le champ de l'une de ces exceptions";
+            this.tools.showAlert("A noter...", miseEnGarde, () => {
+                this.data.miseEnGardeActif = false;
+                this.gen();
+            });
+        } else {
+            this.gen();
+        }
+
+    }
+
     // méthode pour créer les données de l'attestation
     gen() {
         let motifString: string = "";
@@ -151,27 +164,27 @@ export class Tab2Page {
 
                 // liste des positions verticales des motifs
                 const ys = {
-                    travail: [578, 448],
-                    achats: [533, 400],
-                    sante: [477, 363],
-                    famille: [435, 322],
-                    handicap: [396, null],
-                    sport_animaux: [358, 239],
-                    convocation: [295, 198],
-                    missions: [255, null],
-                    enfants: [211, 277],
+                    travail: [553, 448],
+                    achats: [483, 400],
+                    sante: [434, 363],
+                    famille: [410, 322],
+                    handicap: [374, null],
+                    sport_animaux: [349, 239],
+                    convocation: [276, 198],
+                    missions: [253, null],
+                    enfants: [228, 277],
                 }
 
                 // Tableau des données à insérer dans chaque pdf d'attestation
                 const data = [
                     [
-                        [`${pax.prenom} ${pax.nom}`, 119, 696],
-                        [pax.dateDN, 119, 674],
-                        [pax.villeNaissance, 297, 674],
-                        [`${pax.adresse} ${pax.cp} ${pax.ville}`, 133, 652],
-                        [pax.ville, 105, 177, locationSize],
-                        [`${attestation.dateSortie}`, 91, 153],
-                        [attestation.heureSortie, 264, 153, 11]
+                        [`${pax.prenom} ${pax.nom}`, 92, 702],
+                        [pax.dateDN, 92, 684],
+                        [pax.villeNaissance, 213, 684],
+                        [`${pax.adresse} ${pax.cp} ${pax.ville}`, 103, 666],
+                        [pax.ville, 78, 75, locationSize],
+                        [`${attestation.dateSortie}`, 62, 57],
+                        [attestation.heureSortie, 226, 57, 11]
 
                     ],
                     [
@@ -188,7 +201,7 @@ export class Tab2Page {
                 // Iteration sur les motifs à cocher
                 motifsArray.forEach((motif) => {
                     if (style === 1) {
-                        drawText('x', 84, ys[motif][0], 18)
+                        drawText('x', 46, ys[motif][0], 18)
                     }
                     if (style === 2 && ys[motif][1]) {
                         drawText('x', 92, ys[motif][1], 23)

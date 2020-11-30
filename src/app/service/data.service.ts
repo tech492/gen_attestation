@@ -8,36 +8,45 @@ import {Pax} from "../pax";
 })
 export class DataService {
 
+    // Liste des identités crées
     listePax: Array<Pax>;
+
+    // Liste des motifs existants
     motifs: Array<Motif>;
+
+    // Liste des attestations en mémoire
     attestations: Array<Attestation>;
 
+    // Liste temporaire des QRCode à afficher
     tempListQR = [];
+
+    //booléen pour l'affichage de la mise en garde liée aux justificatifs
+    miseEnGardeActif = true;
 
 
     constructor(private storage: Storage) {
         this.attestations = [];
         this.motifs = [
             {
-                infos: 'Déplacements entre le domicile et le lieu d’exercice de l\’activité professionnelle ou un établissement d\’enseignement ou de formation, déplacements professionnels ne pouvant être différés, déplacements pour un concours ou un examen.',
+                infos: "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou un établissement d’enseignement ou de formation ; déplacements professionnels ne pouvant être différés; déplacements pour un concours ou un examen;",
                 value: 'travail',
                 text: 'Travail',
                 isChecked: false
             },
             {
-                infos: 'Déplacements pour effectuer des achats de fournitures nécessaires à l\'activité professionnelle, des achats de première nécessité dans des établissements dont les activités demeurent autorisées, le retrait de commande et les livraisons à domicile.',
+                infos: "Déplacements pour se rendre dans un établissement culturel autorisé ou un lieu de culte; déplacements pour effectuer des achats de biens, pour des services dont la fourniture est autorisée, pour les retraits de commandes et les livraisons à domicile;",
                 value: 'achats',
-                text: 'Achats',
+                text: '⛪ Culte, achats',
                 isChecked: false
             },
             {
                 text: 'Santé',
                 value: 'sante',
-                infos: 'Consultations, examens et soins ne pouvant être ni assurés à distance ni différés et l’achat de médicaments.',
+                infos: "Consultations, examens et soins ne pouvant être assurés à distance et l’achat de médicaments;",
                 isChecked: false
             },
             {
-                infos: 'Déplacements pour motif familial impérieux, pour l\'assistance aux personnes vulnérables et précaires ou la garde d\'enfants.',
+                infos: "Déplacements pour motif familial impérieux, pour l'assistance aux personnes vulnérables et précaires ou la garde d'enfants;",
                 value: 'famille',
                 text: 'Famille',
                 isChecked: false
@@ -51,7 +60,7 @@ export class DataService {
             {
                 text: 'Sport & animaux',
                 value: 'sport_animaux',
-                infos: 'Déplacements brefs, dans la limite d\'une heure quotidienne et dans un rayon maximal d\'un kilomètre autour du domicile, liés soit à l\'activité physique individuelle des personnes, à l\'exclusion de toute pratique sportive collective et de toute proximité avec d\'autres personnes, soit à la promenade avec les seules personnes regroupées dans un même domicile, soit aux besoins des animaux de compagnie.',
+                infos: "Déplacements en plein air ou vers un lieu de plein air, sans changement du lieu de résidence, dans la limite de trois heures quotidiennes et dans un rayon maximal de vingt kilomètres autour du domicile, liés soit à l’activité physique ou aux loisirs individuels, à l’exclusion de toute pratique sportive collective et de toute proximité avec d’autres personnes, soit à la promenade avec les seules personnes regroupées dans un même domicile, soit aux besoins des animaux de compagnie;",
                 isChecked: false
             },
 
@@ -82,6 +91,7 @@ export class DataService {
         console.log("saving");
         this.storage.set('attestations', this.attestations);
         this.storage.set('bioData', this.listePax);
+        this.storage.set('miseEnGarde', this.miseEnGardeActif);
     }
 
     // récupère les données persistées en mémoire
@@ -93,6 +103,10 @@ export class DataService {
         temp = await this.storage.get('bioData');
         if (temp !== null) {
             this.listePax = temp;
+        }
+        temp = await this.storage.get('miseEnGarde');
+        if (temp !== null) {
+            this.miseEnGardeActif = temp;
         }
     }
 
