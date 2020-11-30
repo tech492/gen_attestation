@@ -36,6 +36,10 @@
   }
 }
 
+.selectionnable {
+  user-select: text!important;
+}
+
 .bshadow {
   text-align: center;
 }
