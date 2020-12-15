@@ -4,7 +4,7 @@ import {DataService} from "../service/data.service";
 import {GlobalToolsProvider} from "../global-tools/global-tools";
 import {PDFDocument, StandardFonts} from 'pdf-lib'
 import {File} from "@ionic-native/file/ngx";
-import {attestq42020, attestRoy} from "src/app/tab2/pdfb64.js"
+import {attestcfq42020, attestq42020, attestRoy} from "src/app/tab2/pdfb64.js"
 import {FileOpener} from "@ionic-native/file-opener/ngx";
 import {Pax} from "../pax";
 import {PopoverController} from "@ionic/angular";
@@ -28,7 +28,9 @@ export class Tab2Page {
 
     }
 
-    info () {
+
+
+    info() {
         if (this.data.miseEnGardeActif) {
             let miseEnGarde = "Les personnes souhaitant bénéficier de l'une de ces exceptions doivent se munir s'il y a lieu, lors de leurs déplacements hors de leur domicile, d'un document leur permettant de justifier que le déplacement considéré entre dans le champ de l'une de ces exceptions";
             this.tools.showAlert("A noter...", miseEnGarde, () => {
@@ -50,7 +52,15 @@ export class Tab2Page {
 
         // formatage de l'heure
         let dateformated = dateNow.toLocaleDateString('fr-FR')
-        let hourFormated = (("0" + dateNow.getHours()).slice(-2)) + ':' + (("0" + dateNow.getMinutes()).slice(-2));
+        let hourObject = {
+            hour: (("0" + dateNow.getHours()).slice(-2)),
+            min: (("0" + dateNow.getMinutes()).slice(-2)),
+            styleh: null,
+            style2p: null,
+        };
+
+        hourObject.styleh = hourObject.hour + 'h' + hourObject.min;
+        hourObject.style2p = hourObject.hour + ':' + hourObject.min;
 
         for (let pax of this.data.listePax) {
             if (pax.isChecked) {
@@ -71,10 +81,10 @@ export class Tab2Page {
 
         // création de l'objet attestation
         attestation = new Attestation(dateformated,
-            hourFormated,
+            hourObject.styleh,
             listeSelPax,
             dateformated,
-            hourFormated,
+            hourObject.style2p,
             motifString);
 
         // Ajout de l'attestation dans la liste
@@ -97,8 +107,8 @@ export class Tab2Page {
                 `Prenom: ${pax.prenom}`,
                 `Naissance: ${pax.dateDN} a ${pax.villeNaissance}`,
                 `Adresse: ${pax.adresse} ${pax.cp} ${pax.ville}`,
-                `Sortie: ${attestation.dateCreation} a ${attestation.heureCreation}`,
-                `Motifs: ${attestation.motifs}`,
+                `Sortie: ${attestation.dateCreation} a ${attestation.heureSortie}`,
+                `Motifs: ${attestation.motifs};`,
             ].join(';\n');
 
             array.push({'prenom': pax.prenom, qrCode});
@@ -137,8 +147,10 @@ export class Tab2Page {
 
         if (style == 1) {
             pdfModele = await PDFDocument.load(attestq42020);
-        } else {
+        } else if (style == 2) {
             pdfModele = await PDFDocument.load(attestRoy);
+        } else {
+            pdfModele = await PDFDocument.load(attestcfq42020);
         }
 
         for (const pax of this.data.listePax) {
@@ -150,7 +162,7 @@ export class Tab2Page {
                 const page = pdfDoc.addPage(pageCopy);
 
                 // methode anonyme imbriquée pour insérer du texte dans la page
-                const drawText = (text, x, y, size = style === 1 ? 11 : 18) => {
+                const drawText = (text, x, y, size = style !== 2 ? 11 : 18) => {
                     page.drawText(text, {x, y, size, font})
                 };
 
@@ -164,20 +176,21 @@ export class Tab2Page {
 
                 // liste des positions verticales des motifs
                 const ys = {
-                    travail: [553, 448],
-                    achats: [483, 400],
-                    sante: [434, 363],
-                    famille: [410, 322],
-                    handicap: [374, null],
-                    sport_animaux: [349, 239],
-                    convocation: [276, 198],
-                    missions: [253, null],
-                    enfants: [228, 277],
+                    travail: [553, 448, 540],
+                    achats: [483, 400, null],
+                    sante: [434, 363, 508],
+                    famille: [410, 322, 474],
+                    handicap: [374, null, 441],
+                    animaux: [349, 239, 330],
+                    convocation: [276, 198, 418],
+                    missions: [253, null, 397],
+                    transits: [null, null, 363],
+                    enfants: [228, 277, null]
                 }
 
                 // Tableau des données à insérer dans chaque pdf d'attestation
                 const data = [
-                    [
+                    [ //attestation confinement
                         [`${pax.prenom} ${pax.nom}`, 92, 702],
                         [pax.dateDN, 92, 684],
                         [pax.villeNaissance, 213, 684],
@@ -187,9 +200,18 @@ export class Tab2Page {
                         [attestation.heureSortie, 226, 57, 11]
 
                     ],
-                    [
+                    [ /*attestation medievale*/
                         [attestation.heureSortie, 405, 180],
                         ['à ' + pax.ville, 455, 180]
+                    ],
+                    [ /*attestation couvre feu*/
+                        [`${pax.prenom} ${pax.nom}`, 119, 665],
+                        [pax.dateDN, 119, 645],
+                        [pax.villeNaissance, 312, 645],
+                        [`${pax.adresse} ${pax.cp} ${pax.ville}`, 133, 625],
+                        [pax.ville, 105, 286, locationSize],
+                        [`${attestation.dateSortie}`, 91, 267],
+                        [attestation.heureSortie, 312, 267, 11]
                     ]
                 ]
 
@@ -205,6 +227,9 @@ export class Tab2Page {
                     }
                     if (style === 2 && ys[motif][1]) {
                         drawText('x', 92, ys[motif][1], 23)
+                    }
+                    if (style === 3 && ys[motif][2]) {
+                        drawText('x', 73, ys[motif][2], 18)
                     }
                 })
 
