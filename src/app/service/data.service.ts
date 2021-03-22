@@ -12,7 +12,8 @@ export class DataService {
     listePax: Array<Pax>;
 
     // Liste des motifs existants
-    motifs: Array<Motif>;
+    motifsCF: Array<Motif>;
+    motifsJ: Array<Motif>;
 
     // Liste des attestations en mémoire
     attestations: Array<Attestation>;
@@ -27,54 +28,168 @@ export class DataService {
     constructor(private storage: Storage) {
         this.attestations = [];
 
-        this.motifs = [
+        this.motifsCF = [
             {
-                infos: "Déplacements entre le domicile et le lieu d'exercice de l'activité professionnelle ou le lieu d'enseignement et de formation, déplacements professionnels ne pouvant être différés ;",
+                infos: "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou le lieu d’enseignement et de formation, déplacements professionnels ne pouvant être différés, livraisons à domicile, déplacements pour effectuer des achats de fournitures nécessaires à l'activité professionnelle, déplacements liés à des missions d’intérêt général sur demande de l’autorité administrative ;",
                 value: 'travail',
-                text: '🔨 Travail',
-                isChecked: false
+                text: '🔨 Activité professionnelle, enseignement et formation ',
+                distance: '∞',
+                isChecked: false,
+                page: 1
             },
             {
                 text: '⚕️ Santé',
                 value: 'sante',
-                infos: "Déplacements pour des consultations et soins ne pouvant être assurés à distance et ne pouvant être différés ou pour l'achat de produits de santé ;",
-                isChecked: false
+                infos: "Déplacements pour des consultations, examens, actes de prévention (dont vaccination) et soins ne pouvant être assurés à distance ou pour l’achat de produits de santé ;",
+                distance: '∞',
+                isChecked: false,
+                page: 1
             },
             {
-                infos: "Déplacements pour motif familial impérieux, pour l'assistance aux personnes vulnérables ou précaires ou pour la garde d'enfants ;",
+                infos: "Déplacements pour motif familial impérieux, pour l’assistance aux personnes vulnérables ou précaires ou pour la garde d’enfants ;",
                 value: 'famille',
                 text: '👨‍👩‍👦 Famille',
-                isChecked: false
+                distance: '∞',
+                isChecked: false,
+                page: 1
             },
             {
                 text: '♿ Handicap',
                 value: 'handicap',
                 infos: 'Déplacements des personnes en situation de handicap et de leur accompagnant ;',
-                isChecked: false
+                distance: '∞',
+                isChecked: false,
+                page: 1
             },
             {
                 text: '⚖️ Convocation judiciaire',
-                value: 'convocation',
-                infos: 'Déplacements pour répondre à une convocation judiciaire ou administrative ;',
-                isChecked: false
+                value: 'judiciaire',
+                infos: 'Déplacements pour répondre à une convocation judiciaire ou administrative, déplacements pour se rendre chez un professionnel du droit, pour un acte ou une démarche qui ne peuvent être réalisés à distance ;',
+                distance: '∞',
+                isChecked: false,
+                page: 1
             },
             {
-                text: 'Missions',
+                text: '🛡️ Mission d’intérêt général',
                 value: 'missions',
-                infos: 'Déplacements pour participer à des missions d\'intérêt général sur demande de l\'autorité administrative ;',
-                isChecked: false
+                infos: 'Déplacements pour participer à des missions d’intérêt général sur demande de l’autorité administrative ;',
+                distance: '∞',
+                isChecked: false,
+                page: 1
             },
             {
                 text: '✈️ Transits',
-                value: 'transits',
-                infos: 'Déplacements liés à des transits ferroviaires ou aériens pour des déplacements de longues distances ;',
-                isChecked: false
+                value: 'transit',
+                infos: 'Déplacements de transit et longue distance',
+                isChecked: false,
+                distance: '∞',
+                page: 1
             },
             {
                 text: '🐶 Animaux',
                 value: 'animaux',
                 infos: "Déplacements brefs, dans un rayon maximal d'un kilomètre autour du domicile pour les besoins des animaux de compagnie.",
-                isChecked: false
+                isChecked: false,
+                distance: '1km',
+                page: 1
+            }];
+
+        this.motifsJ = [
+            {
+                infos: "Déplacements liés soit à la promenade, soit à l'activité physique individuelle des personnes ",
+                value: 'sport',
+                text: '🏃  Activité physique et promenade ',
+                distance: '10 km',
+                isChecked: false,
+                page: 1
+            },
+            {
+                infos: "Déplacements pour effectuer des achats de première nécessité ou des retraits de commandes ;",
+                value: 'achats',
+                text: '🛒 Achats',
+                distance: 'Dep /\n30km',
+                isChecked: false,
+                page: 1
+            },
+            {
+                infos: "Déplacements pour emmener et aller chercher les enfants à l’école et à l’occasion de leurs activités péri-scolaires ;",
+                value: 'enfants',
+                text: '🚸 Accompagnement des enfants à l’école',
+                distance: 'Dep /\n30km',
+                isChecked: false,
+                page: 1
+            },
+            {
+                infos: "Déplacements pour se rendre dans un établissement culturel (bibliothèques et médiathèques) ou un lieu de culte ;",
+                value: 'culte_culturel',
+                text: '⛪ Lieu de culte ou Etablissement culturel',
+                distance: 'Dep /\n30km',
+                isChecked: false,
+                page: 2
+            },
+            {
+                infos: "Déplacements pour se rendre dans un service public pour un acte ou une démarche qui ne peuvent être réalisés à distance ;",
+                value: 'demarche',
+                text: '🏢 Démarches administratives ou juridiques',
+                distance: 'Dep /\n30km',
+                isChecked: false,
+                page: 2
+            },
+            {
+                infos: "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou le lieu d’enseignement et de formation, déplacements professionnels ne pouvant être différés, livraisons à domicile, déplacements pour effectuer des achats de fournitures nécessaires à l'activité professionnelle, déplacements liés à des missions d’intérêt général sur demande de l’autorité administrative ;",
+                value: 'travail',
+                text: '🔨 Travail et missions d\'intérêt général',
+                distance: '∞',
+                isChecked: false,
+                page: 2
+            },
+            {
+                text: '⚕️ Santé',
+                value: 'sante',
+                infos: "Déplacements pour des consultations, examens, actes de prévention (dont vaccination) et soins ne pouvant être assurés à distance ou pour l’achat de produits de santé ;",
+                distance: '∞',
+                isChecked: false,
+                page: 2
+            },
+            {
+                infos: "Déplacements pour motif familial impérieux, pour l’assistance aux personnes vulnérables ou précaires ou pour la garde d’enfants ;",
+                value: 'famille',
+                text: '👨‍👩‍👦 Famille',
+                distance: '∞',
+                isChecked: false,
+                page: 2
+            },
+            {
+                text: '♿ Handicap',
+                value: 'handicap',
+                infos: 'Déplacements des personnes en situation de handicap et de leur accompagnant ;',
+                distance: '∞',
+                isChecked: false,
+                page: 2
+            },
+            {
+                text: '⚖️ Convocation judiciaire',
+                value: 'judiciaire',
+                infos: 'Déplacements pour répondre à une convocation judiciaire ou administrative, déplacements pour se rendre chez un professionnel du droit, pour un acte ou une démarche qui ne peuvent être réalisés à distance ;',
+                distance: '∞',
+                isChecked: false,
+                page: 2
+            },
+            {
+                text: '🚚 Déménagement',
+                value: 'demenagement',
+                infos: 'Déplacements liés à un déménagement résultant d\'un changement de domicile et déplacements indispensables à l\'acquisition ou à la location d’une résidence principale, insusceptibles d\'être différés ;',
+                distance: '∞',
+                isChecked: false,
+                page: 2
+            },
+            {
+                text: '✈️ Transits',
+                value: 'transit',
+                infos: 'Déplacement de transit vers les gares et les aéroports',
+                isChecked: false,
+                distance: '∞',
+                page: 2
             }];
         this.listePax= [];
 
@@ -123,9 +238,11 @@ export class DataService {
 
 interface Motif {
     text,
-    value,
+    value: string,
     infos,
-    isChecked
+    distance,
+    isChecked,
+    page: number
 }
 
 

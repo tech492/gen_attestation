@@ -4,7 +4,7 @@ import {DataService} from "../service/data.service";
 import {GlobalToolsProvider} from "../global-tools/global-tools";
 import {PDFDocument, StandardFonts} from 'pdf-lib'
 import {File} from "@ionic-native/file/ngx";
-import {attestcfq42020, attestq42020, attestRoy} from "src/app/tab2/pdfb64.js"
+import {attest2021, attestCF2021} from "src/app/tab2/pdfb64.js"
 import {FileOpener} from "@ionic-native/file-opener/ngx";
 import {Pax} from "../pax";
 import {PopoverController} from "@ionic/angular";
@@ -16,31 +16,40 @@ import {QrcodelistComponent} from "./qrcodelist/qrcodelist.component";
     styleUrls: ['tab2.page.scss']
 })
 export class Tab2Page {
+    get gdhChoisi(): string {
+        if (this._gdhChoisi === undefined) {
+            this._gdhChoisi = this.newDate()
+            return this._gdhChoisi.toISOString();
+        }
+        return this._gdhChoisi.toISOString();
+    }
+
+    set gdhChoisi(value) {
+        console.log("setting gdh", value);
+        this._gdhChoisi = new Date(value);
+    }
 
     generateurActif = false;
-
+    private _gdhChoisi: Date;
 
     constructor(public data: DataService,
                 private tools: GlobalToolsProvider,
                 private file: File,
                 private fileOpener: FileOpener,
                 public popoverController: PopoverController) {
+        this._gdhChoisi = this.newDate();
+    }
 
+    isCouvreFeu(date: Date | string = this._gdhChoisi): boolean {
+        if (typeof date === "string") {
+            date = new Date(date);
+        }
+        return date.getHours() >= 19 || date.getHours() <= 6
     }
 
 
-
-    info() {
-        if (this.data.miseEnGardeActif) {
-            let miseEnGarde = "Les personnes souhaitant bénéficier de l'une de ces exceptions doivent se munir s'il y a lieu, lors de leurs déplacements hors de leur domicile, d'un document leur permettant de justifier que le déplacement considéré entre dans le champ de l'une de ces exceptions";
-            this.tools.showAlert("A noter...", miseEnGarde, () => {
-                this.data.miseEnGardeActif = false;
-                this.gen();
-            });
-        } else {
-            this.gen();
-        }
-
+    newDate(date = new Date()) {
+        return date
     }
 
     // méthode pour créer les données de l'attestation
@@ -48,52 +57,79 @@ export class Tab2Page {
         let motifString: string = "";
         let listeSelPax: Array<Pax> = [];
         let attestation: Attestation;
-        let dateNow = new Date();
 
-        // formatage de l'heure
-        let dateformated = dateNow.toLocaleDateString('fr-FR')
-        let hourObject = {
-            hour: (("0" + dateNow.getHours()).slice(-2)),
-            min: (("0" + dateNow.getMinutes()).slice(-2)),
-            styleh: null,
-            style2p: null,
+        // fonction pour tester les données du formulaire
+        let prepareAndCheck = (): boolean => {
+
+            for (let pax of this.data.listePax) {
+                if (pax.isChecked) {
+                    listeSelPax.push(pax);
+                }
+            }
+
+            for (let motif of this.data.motifsCF) {
+                if (motif.isChecked) {
+                    if (motifString.length) {
+                        motifString += ", " + motif.value;
+                    } else {
+                        motifString += motif.value
+                    }
+                }
+            }
+
+
+            for (let motif of this.data.motifsJ) {
+                if (motif.isChecked) {
+                    if (motifString.length) {
+                        motifString += ", " + motif.value;
+                    } else {
+                        motifString += motif.value
+                    }
+                }
+            }
+
+            return !!(this._gdhChoisi && listeSelPax && motifString);
+
         };
 
-        hourObject.styleh = hourObject.hour + 'h' + hourObject.min;
-        hourObject.style2p = hourObject.hour + ':' + hourObject.min;
+// teste si les infos sont bien remplies sinon affiche un message d'erreur
+        if (prepareAndCheck()) {
+            let dateObject = new Date(this._gdhChoisi);
+            let dateformated = dateObject.toLocaleDateString('fr-FR');
 
-        for (let pax of this.data.listePax) {
-            if (pax.isChecked) {
-                listeSelPax.push(pax);
-            }
+            // formatage de l'heure
+            let hourObject = {
+                hour: (("0" + dateObject.getHours()).slice(-2)),
+                min: (("0" + dateObject.getMinutes()).slice(-2)),
+                styleh: null,
+                style2p: null,
+            };
+
+            hourObject.styleh = hourObject.hour + 'h' + hourObject.min;
+            hourObject.style2p = hourObject.hour + ':' + hourObject.min;
+
+            // création de l'objet attestation
+            attestation = new Attestation(dateformated,
+                hourObject.styleh,
+                listeSelPax,
+                dateformated,
+                hourObject.style2p,
+                motifString,
+                dateObject.toISOString());
+
+            // Ajout de l'attestation dans la liste
+            this.data.attestations.push(attestation);
+
+            this.data.saveData();
+
+            this.generateurActif = false;
+        } else {
+            this.tools.showAlert("Erreur", "Veuillez vérifier que toutes les informations sont renseignées")
         }
 
-        for (let motif of this.data.motifs) {
-            if (motif.isChecked) {
-                if (motifString.length) {
-                    motifString += ", " + motif.value;
-                } else {
-                    motifString += motif.value
-                }
 
-            }
-        }
-
-        // création de l'objet attestation
-        attestation = new Attestation(dateformated,
-            hourObject.styleh,
-            listeSelPax,
-            dateformated,
-            hourObject.style2p,
-            motifString);
-
-        // Ajout de l'attestation dans la liste
-        this.data.attestations.push(attestation);
-
-        this.data.saveData();
-
-        this.generateurActif = false;
     }
+
 
     async genQr(attestation: Attestation) {
         let loading = await this.tools.presentLoading("Génération en cours...");
@@ -134,11 +170,13 @@ export class Tab2Page {
     }
 
 // Methode principale pour générer le pdf
-    async generatePdf(attestation: Attestation, style: number) {
+    async generatePdf(attestation: Attestation, style: number = this.isCouvreFeu(attestation.gdh) ? 2 : 1) {
         let loading = await this.tools.presentLoading("Génération du pdf, veuillez patienter");
 
         console.log("Hello generatePdf : ", attestation);
         const motifsArray = attestation.motifs.split(', ');
+
+        let multiPage;
 
         // chargement du modèle d'attestation
         let pdfDoc = await PDFDocument.create();
@@ -146,24 +184,41 @@ export class Tab2Page {
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
         if (style == 1) {
-            pdfModele = await PDFDocument.load(attestq42020);
-        } else if (style == 2) {
-            pdfModele = await PDFDocument.load(attestRoy);
+            let temp ;
+
+            motifsArray.forEach((motif) => {
+               temp = this.data.motifsJ.find((motifFound) => motifFound.value == motif).page == 2;
+            });
+
+            if (temp) {
+                multiPage = true;
+            }
+            pdfModele = await PDFDocument.load(attest2021);
         } else {
-            pdfModele = await PDFDocument.load(attestcfq42020);
+            pdfModele = await PDFDocument.load(attestCF2021);
         }
 
         for (const pax of this.data.listePax) {
             let i;
             if (pax.isChecked) {
                 i++;
+                let page;
 
-                let [pageCopy] = await pdfDoc.copyPages(pdfModele, [0]);
-                const page = pdfDoc.addPage(pageCopy);
+                if (multiPage) {
+                    let pageCopy = [];
+                    pageCopy.push(await pdfDoc.copyPages(pdfModele, [0]));
+                    pageCopy.push(await pdfDoc.copyPages(pdfModele, [1]));
+                    page = [pdfDoc.addPage(pageCopy[0][0]), pdfDoc.addPage(pageCopy[1][0])];
+                } else {
+
+                    let [pageCopy] = await pdfDoc.copyPages(pdfModele, [0]);
+                    page = [pdfDoc.addPage(pageCopy)];
+                }
+
 
                 // methode anonyme imbriquée pour insérer du texte dans la page
-                const drawText = (text, x, y, size = style !== 2 ? 11 : 18) => {
-                    page.drawText(text, {x, y, size, font})
+                const drawText = (pageNumber: number, text, x, y, size = 11) => {
+                    page[pageNumber].drawText(text, {x, y, size, font})
                 };
 
 
@@ -176,60 +231,59 @@ export class Tab2Page {
 
                 // liste des positions verticales des motifs
                 const ys = {
-                    travail: [553, 448, 540],
-                    achats: [483, 400, null],
-                    sante: [434, 363, 508],
-                    famille: [410, 322, 474],
-                    handicap: [374, null, 441],
-                    animaux: [349, 239, 330],
-                    convocation: [276, 198, 418],
-                    missions: [253, null, 397],
-                    transits: [null, null, 363],
-                    enfants: [228, 277, null]
+                    travail: [629, 579, null],
+                    achats: [244, null, null],
+                    sante: [533, 546, null],
+                    famille: [477, 512, null],
+                    handicap: [422, 478, null],
+                    judiciaire: [380, 458, null],
+                    missions: [null, 412, null],
+                    transit: [243, 379, null],
+                    animaux: [null, 345, null],
+                    sport: [367, null, null],
+                    enfants: [161, null, null],
+                    culte_culturel: [781, null, null],
+                    demarche: [726, null, null],
+                    demenagement: [311, null, null],
                 }
 
                 // Tableau des données à insérer dans chaque pdf d'attestation
                 const data = [
                     [ //attestation confinement
-                        [`${pax.prenom} ${pax.nom}`, 92, 702],
-                        [pax.dateDN, 92, 684],
-                        [pax.villeNaissance, 213, 684],
-                        [`${pax.adresse} ${pax.cp} ${pax.ville}`, 103, 666],
-                        [pax.ville, 78, 75, locationSize],
-                        [`${attestation.dateSortie}`, 62, 57],
-                        [attestation.heureSortie, 226, 57, 11]
+                        [`${pax.prenom} ${pax.nom}`, 111, 516],
+                        [pax.dateDN, 111, 501],
+                        [pax.villeNaissance, 228, 501],
+                        [`${pax.adresse} ${pax.cp} ${pax.ville}`, 126, 487],
+                        [`Fait à ${pax.ville}`, 72, 99, locationSize, 1],
+                        ['(Date et heure de début de sortie à mentionner obligatoirement)', 72, 67, locationSize, 1],
+                        [`Le ${attestation.dateSortie}`, 72, 83, undefined, 1],
+                        [`à ${attestation.heureSortie}`, 310, 83, undefined, 1]
 
                     ],
-                    [ /*attestation medievale*/
-                        [attestation.heureSortie, 405, 180],
-                        ['à ' + pax.ville, 455, 180]
-                    ],
                     [ /*attestation couvre feu*/
-                        [`${pax.prenom} ${pax.nom}`, 119, 665],
-                        [pax.dateDN, 119, 645],
-                        [pax.villeNaissance, 312, 645],
-                        [`${pax.adresse} ${pax.cp} ${pax.ville}`, 133, 625],
-                        [pax.ville, 105, 286, locationSize],
-                        [`${attestation.dateSortie}`, 91, 267],
-                        [attestation.heureSortie, 312, 267, 11]
+                        [`${pax.prenom} ${pax.nom}`, 144, 705],
+                        [pax.dateDN, 144, 684],
+                        [pax.villeNaissance, 310, 684],
+                        [`${pax.adresse} ${pax.cp} ${pax.ville}`, 148, 665],
+                        [`Fait à ${pax.ville}`, 72, 109, locationSize],
+                        [`Le ${attestation.dateSortie}`, 72, 93],
+                        [`à ${attestation.heureSortie}`, 310, 93, 11],
+                        ['(Date et heure de début de sortie à mentionner obligatoirement)', 72, 77, locationSize]
                     ]
                 ]
 
                 // Iteration sur les données textuelles à insérer
                 data[style - 1].forEach((drawing) => {
-                    drawText(drawing[0], drawing[1], drawing[2], drawing[3] ? drawing[3] : undefined);
+                    drawText(drawing[4] ? drawing[4] : 0, drawing[0], drawing[1], drawing[2], drawing[3] ? drawing[3] : undefined);
                 })
 
-                // Iteration sur les motifs à cocher
+                // Iteration sur les motifs à cocher (style 1 = jour, style 2 = Couvre Feu)
                 motifsArray.forEach((motif) => {
                     if (style === 1) {
-                        drawText('x', 46, ys[motif][0], 18)
+                        drawText(this.data.motifsJ.find((motifFound) => motifFound.value == motif).page-1, 'x', 60, ys[motif][0], 18)
                     }
                     if (style === 2 && ys[motif][1]) {
-                        drawText('x', 92, ys[motif][1], 23)
-                    }
-                    if (style === 3 && ys[motif][2]) {
-                        drawText('x', 73, ys[motif][2], 18)
+                        drawText(this.data.motifsCF.find((motifFound) => motifFound.value == motif).page-1, 'x', 73, ys[motif][1], 18)
                     }
                 })
 

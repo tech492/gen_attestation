@@ -10,9 +10,9 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <div>
+    <div>
 
-  </div>
+    </div>
     <div *ngIf="generateurActif">
         <ion-card>
             <ion-card-title>Choisir le(s) bénéficiaires(s)</ion-card-title>
@@ -29,12 +29,22 @@
             </ion-list>
         </ion-card>
         <ion-card>
-            <ion-card-content>
-                <ion-card-title>Choisir le(s) motif(s)</ion-card-title>
+            <ion-card-title>Choisir l'horaire</ion-card-title>
+            <ion-list class="ion-no-padding">
+                <ion-item>
+                    <ion-icon name="time" slot="start"></ion-icon>
+                    <ion-datetime placeholder="Tout de suite" displayFormat="HH:mm" [value]="gdhChoisi" (ionChange)="gdhChoisi=$event.detail.value"></ion-datetime>
+                </ion-item>
+            </ion-list>
+        </ion-card>
+        <ion-card *ngIf="gdhChoisi">
+            <ion-card-content *ngIf="isCouvreFeu(); else elseBlock">
+                <ion-card-title>Choisir le(s) motif(s) de nuit</ion-card-title>
                 <ion-list class="ion-no-padding">
-                    <ion-item *ngFor="let motif of this.data.motifs">
-                        <ion-icon name="information-circle-outline" slot="start"
-                                  (click)="showTip(motif.infos)"></ion-icon>
+                    <ion-item *ngFor="let motif of this.data.motifsCF">
+                        <ion-badge color="primary" slot="start"
+                                   (click)="showTip(motif.infos)">{{motif.distance}}</ion-badge>
+
                         <ion-label class="ion-text-wrap">
                             <ion-text>
                                 <h3>{{motif.text}}</h3>
@@ -45,6 +55,25 @@
                 </ion-list>
                 <ion-button size="full" (click)="gen()">Generer</ion-button>
             </ion-card-content>
+            <ng-template #elseBlock>
+                <ion-card-content>
+                    <ion-card-title>Choisir le(s) motif(s) de jour</ion-card-title>
+                    <ion-list class="ion-no-padding">
+                        <ion-item *ngFor="let motif of this.data.motifsJ">
+                            <ion-badge color="primary" slot="start"
+                                       (click)="showTip(motif.infos)">{{motif.distance}}</ion-badge>
+                            <ion-label class="ion-text-wrap">
+                                <ion-text>
+                                    <h3>{{motif.text}}</h3>
+                                </ion-text>
+                            </ion-label>
+                            <ion-checkbox slot="end" [(ngModel)]="motif.isChecked"></ion-checkbox>
+                        </ion-item>
+                    </ion-list>
+                    <ion-button size="full" (click)="gen()">Generer</ion-button>
+                </ion-card-content>
+            </ng-template>
+
         </ion-card>
     </div>
 
@@ -57,8 +86,8 @@
                 ({{attestation.motifs}})
             </ion-label>
             <ion-icon name="qr-code-sharp" slot="end" (click)="genQr(attestation)"></ion-icon>
-            <ion-icon name="document" slot="end" (click)="generatePdf(attestation, 3)"></ion-icon>
-<!--            <img src="assets/lis.png" class="iconCustom" slot="end" (click)="generatePdf(attestation, 2)">-->
+            <ion-icon name="document" slot="end" (click)="generatePdf(attestation)"></ion-icon>
+            <!--            <img src="assets/lis.png" class="iconCustom" slot="end" (click)="generatePdf(attestation, 2)">-->
         </ion-item>
     </ion-list>
 

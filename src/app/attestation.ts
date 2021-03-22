@@ -7,7 +7,9 @@ export class Attestation {
                 public dateSortie: string,
                 public heureSortie: string,
                 public motifs: string,
-                public qrcode = "") {
+                public gdh: string,
+                public qrcode = "",
+                ) {
 
     }
 
