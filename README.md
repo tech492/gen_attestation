@@ -1,9 +1,10 @@
 # Generateur d'attestation
 
-### ⚠️ Version de l'attestation exploitée : 30/11/2020 ⚠️
+### ⚠️ Version des attestations exploitées : 22/03/2021 ⚠️
+V 2.2.0
 
 ### En bref...
-Destiné à créer facilement et en local des attestation de déplacement pour les periodes de confinement.
+Destiné à créer facilement et en local des attestation de déplacement pour les periodes de confinement et de couvre feu.
 
 ### Fonctionnalités notables
 * Tout se passe sur le téléphone, rien ne passe sur internet
